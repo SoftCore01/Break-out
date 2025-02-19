@@ -32,6 +32,8 @@ let interval = 0;
 let score = 0;
 let lives = 3;
 
+let isPlay = false;
+let ddx, ddy;
 
 
 function draw() {
@@ -180,7 +182,38 @@ function gameOver() {
 
 function startGame() {
   interval = setInterval(draw, 10);
+  createPaddleControls();
+  isPlay = true;
 }
+
+function pausePlay() {
+  if (isPlay) {
+    ddx = dx;
+    ddy = dy;
+    dx = 0;
+    dy = 0;
+    isPlay = false;
+    destroyPaddleControls();
+  } else {
+    dx = ddx;
+    dy = ddy;
+    isPlay = true;
+    createPaddleControls();
+  }
+}
+
+function createPaddleControls() {
+  document.addEventListener("keydown", keyDownHandler, false);
+  document.addEventListener("keyup", keyUpHandler, false);
+  document.addEventListener("mousemove", mouseMoveHandler, false);
+}
+
+function destroyPaddleControls() {
+  document.removeEventListener("keydown", keyDownHandler);
+  document.removeEventListener("keyup", keyUpHandler);
+  document.removeEventListener("mousemove", mouseMoveHandler);
+}
+
 
 
 
@@ -188,7 +221,5 @@ document.getElementById("runButton").addEventListener("click", function () {
     startGame();
     this.disable = true;
 })
+document.getElementById("pause").addEventListener("click", pausePlay)
 
-document.addEventListener("keydown", keyDownHandler, false);
-document.addEventListener("keyup", keyUpHandler, false);
-document.addEventListener("mousemove", mouseMoveHandler, false);
