@@ -168,7 +168,9 @@ function keyUpHandler(e) {
 
 function mouseMoveHandler(e) {
   const relativeX = e.clientX - canvas.offsetLeft;
-  relativeX > 0 && relativeX < canvas.width ? paddleX = relativeX : null;
+  if (relativeX > 0 && relativeX < canvas.width - paddleWidth) {
+    paddleX = relativeX;
+  }
 }
 
 function gameOver() {
