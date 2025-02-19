@@ -22,10 +22,10 @@ for (let c = 0; c < brickColumnCount; c++) {
 
 
 let paddleX = (canvas.width - paddleWidth) / 2;
-let x = ballRadius;
-let y = canvas.height - ballRadius;
+let x = /* ballRadius */ canvas.width / 2;
+let y = /* canvas.height - ballRadius */ canvas.height / 2;
 let dx = 1;
-let dy = -1;
+let dy = 1;
 let rightPressed = false;
 let leftPressed = false;
 let interval = 0;
@@ -45,7 +45,7 @@ function draw() {
 
   if (y + dy < ballRadius) {    
     dy = -dy;
-  } else if (y + dy > canvas.height - ballRadius) {
+  } else if (y + dy > canvas.height - ballRadius - paddleHeight) {
     if (x > paddleX && x < paddleX + paddleWidth) {
         dy = -dy;
     } else {
@@ -54,9 +54,9 @@ function draw() {
           gameOver();
         } else {
           x = canvas.width / 2;
-          y = canvas.height - 30;
+          y = canvas.height / 2;
           dx = 1;
-          dy = -1;
+          dy = 1;
           paddleX = (canvas.width - paddleWidth) / 2
         }
     }
@@ -168,7 +168,7 @@ function keyUpHandler(e) {
 
 function mouseMoveHandler(e) {
   const relativeX = e.clientX - canvas.offsetLeft;
-  relativeX > 0 && relativeX < canvas.width ? paddleX = relativeX - paddleWidth / 2: null;
+  relativeX > 0 && relativeX < canvas.width ? paddleX = relativeX : null;
 }
 
 function gameOver() {
