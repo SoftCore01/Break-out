@@ -14,20 +14,27 @@ const brickHeight = 20;
 const brickPadding = 10;
 const brickOffsetTop = 30;
 const brickOffsetLeft = 30;
+const extraLife = { x: 0, y: 0, visible: false}
+let callCountForAddExtraLives = 0;
 
 const bricks = [];
 for (let c = 0; c < brickColumnCount; c++) {
   bricks[c] = [];
   for (let r = 0; r < brickRowCount; r++) {
-    bricks[c][r] = { x: 0, y: 0, status: 1};
+    bricks[c][r] = { x: 0, y: 0, status: 1, life: false};
+    if (addExtraLifeToBrick(c,r)) {
+      console.log(c,r)
+      bricks[c][r].life = true;
+      callCountForAddExtraLives ++;
+    };
   }
 }
 
 
 let paddleX = (canvas.width - paddleWidth) / 2;
-let x = /* ballRadius */ canvas.width / 2;
+let x = randomRange(50, canvas.width - 50);
 let y = /* canvas.height - ballRadius */ canvas.height / 2;
-let dx = 1;
+let dx = changeLife();
 let dy = 1;
 let rightPressed = false;
 let leftPressed = false;
@@ -35,6 +42,7 @@ let interval = 0;
 let score = 0;
 let lives = 3;
 let isRestart = false;
+/* let callCountForAddExtraLives = 0; */
 
 let isPlay = false;
 let ddx, ddy;
@@ -51,6 +59,10 @@ function draw() {
   ballWallCollision();
   updateBallPosition();
   paddleMovementByKeydown();
+  drawLifeBall(extraLife.x, extraLife.y);
+  updateLifeBallPosition();
+  checkLifeBallAndPaddleCollision()
+  checkLivesLeft();
 }
   
 function drawBall() {
@@ -58,21 +70,15 @@ function drawBall() {
   ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
   ctx.fillStyle = "#000000";
   ctx.fill();
-  ctx.closePath();
-
-  /* ctx.beginPath();
-  ctx.rect(x-ballRadius, y-ballRadius, 2*ballRadius, 2*ballRadius);
-  ctx.strokeStyle = "#000000";
-  ctx.stroke();
-  ctx.closePath(); */
+  ctx.closePath();  
 }
 
 function drawPaddle() {
-    ctx.beginPath();
-    ctx.roundRect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight, paddleHeight / 2);
-    ctx.fillStyle = "black"
-    ctx.fill();
-    ctx.closePath();
+  ctx.beginPath();
+  ctx.roundRect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight, paddleHeight / 2);
+  ctx.fillStyle = "black"
+  ctx.fill();
+  ctx.closePath();
 }
 
 function drawBricks() {
@@ -98,7 +104,6 @@ function drawBricks() {
           : r == 1
           ? (ctx.fillStyle = "green")
           : (ctx.fillStyle = "#0095DD");
-        /* ctx.fillStyle = "#0095DD"; */
         ctx.fill();
         ctx.closePath();
       }
@@ -107,31 +112,22 @@ function drawBricks() {
 }
 
 
-/* function drawAnimation() {
-  let newBricks = {...bricks};
-  for (let c = 0; c < brickColumnCount; c++) {
-    for (let r = 0; r < brickRowCount; r++) {
-      bricks[c][r].y = newBricks[c][r].y - 30;
-    }
-  }
-} */
-
 function collisionDetection() {
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
       const b = bricks[c][r];
       if (b.status === 1) {
-        if (
-          x - ballRadius > b.x - brickHeight / 2 &&
-          x - ballRadius < b.x + brickWidth &&
-          y + ballRadius > b.y &&
-          y - ballRadius < b.y + brickHeight
-        ) {
+        if (hasBallAndBrickCollided(b)) {
           dy = -dy;
           b.status = 0;
+          /* b.life ? lives ++ : null; */
+          if (b.life) {
+            extraLife.x = b.x + b.x / 2;
+            extraLife.y = b.y;
+            extraLife.visible = true;
+            b.life = false;
+          }
           score ++;
-          
-          /* score === brickColumnCount * brickRowCount ? restartGame() : null; */
           checkAllStatus() ? null : restartGame(); 
         }
       }
@@ -188,7 +184,8 @@ function startGame() {
 
 function restartGame() {
   isRestart = true;
-  x = canvas.width / 2;
+  callCountForAddExtraLives = 0;
+  x = randomRange(50, canvas.width - 50);
   y = canvas.height / 2;
   dx = 1;
   dy = 1;
@@ -196,6 +193,11 @@ function restartGame() {
     for (let r = 0; r < brickRowCount; r++) {
       bricks[c][r].status = 1;
       bricks[c][r].y = r * (brickHeight + brickPadding) + brickOffsetTop - 50;
+      if (addExtraLifeToBrick(c, r)) {
+        console.log(c, r);
+        bricks[c][r].life = true;
+        callCountForAddExtraLives++;
+      }
     }
   }
 }
@@ -249,13 +251,16 @@ function ballWallCollision() {
       dy = -dy;
     } else {
       lives--;
-      if (!lives) {
-        gameOver();
-      } else {
-        repositionBallAndPaddle()
+      repositionBallAndPaddle()
       }
     }
-  }
+}
+
+function randomRange(min, max) {
+  const randomStart = Math.random();
+  const diff = max - min;
+
+  return randomStart * diff + min;
 }
 
 function updateBallPosition() {
@@ -283,6 +288,64 @@ function repositionBallAndPaddle() {
   dx = 1;
   dy = 1;
   paddleX = (canvas.width - paddleWidth) / 2;
+}
+
+function hasBallAndBrickCollided(b) {
+  return (
+    x - ballRadius > b.x - brickHeight / 2 &&
+    x - ballRadius < b.x + brickWidth &&
+    y + ballRadius > b.y &&
+    y - ballRadius < b.y + brickHeight
+  );
+}
+
+function addExtraLifeToBrick(c, r) {
+  if (callCountForAddExtraLives < 1 && c != r) {
+    const randC = Math.round(Math.random() * c);
+    const randR = Math.round(Math.random() * r);
+    return c == randC && r == randR;
+  }
+  return false 
+}
+
+function drawLifeBall(mx, my) {
+  if (extraLife.visible) {
+    ctx.beginPath();
+    ctx.arc(mx, my, 5, 0, Math.PI * 2);
+    ctx.fillStyle = "pink";
+    ctx.fill();
+    ctx.closePath();
+  }
+}
+
+function updateLifeBallPosition() {
+  if (extraLife.visible) {
+    extraLife.y += 0.5;
+  } 
+}
+
+function checkLifeBallAndPaddleCollision() {
+  if (
+    extraLife.visible &&
+    extraLife.x >= paddleX - paddleHeight / 2 &&
+    extraLife.x <= paddleX + paddleWidth + paddleHeight / 2 &&
+    extraLife.y >= canvas.height - 5 - paddleHeight
+  ) {
+    console.log("hello");
+    lives += changeLife();
+    extraLife.visible = false;
+  }
+}
+
+function checkLivesLeft() {
+  if (lives < 1) {
+    gameOver()
+  }
+}
+
+function changeLife() {
+  const weight = Math.round(Math.random()*10);
+  return weight <= 5 ? 1: weight >= 6 ? -1 : null
 }
 
 document.getElementById("runButton").addEventListener("click", function () {
