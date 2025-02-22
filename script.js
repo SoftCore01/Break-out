@@ -7,26 +7,31 @@ const ctx = canvas.getContext("2d");
 const ballRadius = 10;
 const paddleHeight = 10;
 const paddleWidth = 75;
-const brickRowCount = 3;
+const brickRowCount = 4;
 const brickColumnCount = 5;
 const brickWidth = 75;
 const brickHeight = 20;
 const brickPadding = 10;
 const brickOffsetTop = 30;
 const brickOffsetLeft = 30;
-const extraLife = { x: 0, y: 0, visible: false}
+const extraLife = { x: 0, y: 0, visible: false};
 let callCountForAddExtraLives = 0;
+let callCountForAddBomb = 0;
 
 const bricks = [];
 for (let c = 0; c < brickColumnCount; c++) {
   bricks[c] = [];
   for (let r = 0; r < brickRowCount; r++) {
-    bricks[c][r] = { x: 0, y: 0, status: 1, life: false};
+    bricks[c][r] = { x: 0, y: 0, status: 1, life: false, bomb: false};
     if (addExtraLifeToBrick(c,r)) {
-      console.log(c,r)
       bricks[c][r].life = true;
       callCountForAddExtraLives ++;
     };
+    if (addBomb(c,r)) {
+      console.log(c,r)
+      bricks[c][r].bomb = true;
+      callCountForAddBomb ++;
+    }
   }
 }
 
@@ -103,7 +108,10 @@ function drawBricks() {
           ? (ctx.fillStyle = "red")
           : r == 1
           ? (ctx.fillStyle = "green")
-          : (ctx.fillStyle = "#0095DD");
+          : r == 2
+          ? (ctx.fillStyle = "#0095DD")
+          : (ctx.fillStyle = "yellow");
+        bricks[c][r].bomb ? ctx.fillStyle = "purple" : null;
         ctx.fill();
         ctx.closePath();
       }
@@ -126,6 +134,9 @@ function collisionDetection() {
             extraLife.y = b.y;
             extraLife.visible = true;
             b.life = false;
+          }
+          if (b.bomb) {
+            explosion(c,r);
           }
           score ++;
           checkAllStatus() ? null : restartGame(); 
@@ -197,6 +208,10 @@ function restartGame() {
         console.log(c, r);
         bricks[c][r].life = true;
         callCountForAddExtraLives++;
+      }
+      if (addBomb(c, r)) {
+        bricks[c][r].bomb = true;
+        callCountForAddBomb++;
       }
     }
   }
@@ -300,8 +315,17 @@ function hasBallAndBrickCollided(b) {
 }
 
 function addExtraLifeToBrick(c, r) {
-  if (callCountForAddExtraLives < 1 && c != r) {
-    const randC = Math.round(Math.random() * c);
+  if (callCountForAddExtraLives < 1 && c != r && c > 0)  {
+    let randC = Math.round(Math.random() * c);
+    const randR = Math.round(Math.random() * r);
+    return c == randC && r == randR;
+  }
+  return false 
+}
+
+function addBomb(c, r) {
+  if (callCountForAddBomb < 1 && c != r && r > 0 && c > 0) {
+    let randC = Math.round(Math.random() * c);
     const randR = Math.round(Math.random() * r);
     return c == randC && r == randR;
   }
@@ -340,6 +364,32 @@ function checkLifeBallAndPaddleCollision() {
 function checkLivesLeft() {
   if (lives < 1) {
     gameOver()
+  }
+}
+
+function explosion(c,r) {
+  if (r == 0) {
+    bricks[c][r+1].status = 0;
+    score++;
+  } else if (r == 3) {
+    bricks[c][r-1].status = 0;
+    score++;
+  } else {
+    bricks[c][r+1].status = 0;
+    bricks[c][r-1].status = 0;
+    score += 2;
+  }
+
+  if (c == 0) {
+    bricks[c+1][r].status = 0;
+    score++;
+  } else if (c == 4) {
+    bricks[c-1][r].status = 0;
+    score++;
+  } else {
+    bricks[c+1][r].status = 0;
+    bricks[c-1][r].status = 0;
+    score += 2;
   }
 }
 
