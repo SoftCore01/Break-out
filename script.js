@@ -6,7 +6,7 @@ const ctx = canvas.getContext("2d");
 
 const ballRadius = 10;
 const paddleHeight = 10;
-const paddleWidth = 75;
+let paddleWidth = 75;
 const brickRowCount = 4;
 const brickColumnCount = 5;
 const brickWidth = 75;
@@ -14,7 +14,14 @@ const brickHeight = 20;
 const brickPadding = 10;
 const brickOffsetTop = 30;
 const brickOffsetLeft = 30;
-const extraLife = { x: 0, y: 0, visible: false};
+const extraLife = { name: "Extra Life", x: 0, y: 0, visible: false, isCalled: false};
+const paddleModifier = { name: "Paddle Extender",x: 0, y: 0, visible: false, isCalled: false};
+const bomb = {name: "Bomb", visible: false, isCalled: false};
+const powerUpCallCounts = {
+  callCountForAddBomb: true,
+  callCountForAddExtraLives: true,
+  callCountForPaddleModifier: false
+}
 let callCountForAddExtraLives = 0;
 let callCountForAddBomb = 0;
 
@@ -22,15 +29,21 @@ const bricks = [];
 for (let c = 0; c < brickColumnCount; c++) {
   bricks[c] = [];
   for (let r = 0; r < brickRowCount; r++) {
-    bricks[c][r] = { x: 0, y: 0, status: 1, life: false, bomb: false};
-    if (addExtraLifeToBrick(c,r)) {
+    bricks[c][r] = { x: 0, y: 0, status: 1, life: false, bomb: false, paddleMode: false};
+    if (addPowerUpToBrick(c,r, extraLife)) {
+      console.log(c,r, extraLife)
       bricks[c][r].life = true;
-      callCountForAddExtraLives ++;
+      extraLife.isCalled = true;
     };
-    if (addBomb(c,r)) {
-      console.log(c,r)
+    if (addPowerUpToBrick(c,r, bomb)) {
+      console.log(c,r, bomb)
       bricks[c][r].bomb = true;
-      callCountForAddBomb ++;
+      bomb.isCalled = true;
+    }
+    if (addPowerUpToBrick(c,r, paddleModifier)) {
+      console.log(c,r, paddleModifier)
+      bricks[c][r].paddleMod = true;
+      paddleModifier.isCalled = true;
     }
   }
 }
@@ -64,9 +77,12 @@ function draw() {
   ballWallCollision();
   updateBallPosition();
   paddleMovementByKeydown();
-  drawLifeBall(extraLife.x, extraLife.y);
-  updateLifeBallPosition();
-  checkLifeBallAndPaddleCollision()
+  checkPowerUpAndPaddleCollision(extraLife);
+  checkPowerUpAndPaddleCollision(paddleModifier);
+  drawPowerUp(extraLife, "pink");
+  drawPowerUp(paddleModifier, "orange");
+  updatePowerUpPosition(extraLife);
+  updatePowerUpPosition(paddleModifier);
   checkLivesLeft();
 }
   
@@ -130,13 +146,20 @@ function collisionDetection() {
           b.status = 0;
           /* b.life ? lives ++ : null; */
           if (b.life) {
+            extraLife.visible = true;
             extraLife.x = b.x + b.x / 2;
             extraLife.y = b.y;
-            extraLife.visible = true;
             b.life = false;
           }
           if (b.bomb) {
             explosion(c,r);
+            b.bomb = false;
+          }
+          if (b.paddleMod) {
+            paddleModifier.visible = true;
+            paddleModifier.x = b.x + b.x / 2;
+            paddleModifier.y = b.y;
+            b.paddleMod = false;
           }
           score ++;
           checkAllStatus() ? null : restartGame(); 
@@ -195,7 +218,9 @@ function startGame() {
 
 function restartGame() {
   isRestart = true;
-  callCountForAddExtraLives = 0;
+  extraLife.isCalled = false;
+  bomb.isCalled = false
+  paddleModifier.isCalled = false;
   x = randomRange(50, canvas.width - 50);
   y = canvas.height / 2;
   dx = 1;
@@ -204,14 +229,17 @@ function restartGame() {
     for (let r = 0; r < brickRowCount; r++) {
       bricks[c][r].status = 1;
       bricks[c][r].y = r * (brickHeight + brickPadding) + brickOffsetTop - 50;
-      if (addExtraLifeToBrick(c, r)) {
-        console.log(c, r);
+      if (addPowerUpToBrick(c, r, extraLife)) {
         bricks[c][r].life = true;
-        callCountForAddExtraLives++;
+        extraLife.isCalled = true;
       }
-      if (addBomb(c, r)) {
+      if (addPowerUpToBrick(c, r, bomb)) {
         bricks[c][r].bomb = true;
-        callCountForAddBomb++;
+        bomb.isCalled = true;
+      }
+      if (addPowerUpToBrick(c, r, paddleModifier)) {
+        bricks[c][r].paddleMod = true;
+        paddleModifier.isCalled = true;
       }
     }
   }
@@ -314,8 +342,8 @@ function hasBallAndBrickCollided(b) {
   );
 }
 
-function addExtraLifeToBrick(c, r) {
-  if (callCountForAddExtraLives < 1 && c != r && c > 0)  {
+function addPowerUpToBrick(c, r, powerUp) {
+  if (!powerUp.isCalled && c != r && c > 0)  {
     let randC = Math.round(Math.random() * c);
     const randR = Math.round(Math.random() * r);
     return c == randC && r == randR;
@@ -323,41 +351,58 @@ function addExtraLifeToBrick(c, r) {
   return false 
 }
 
-function addBomb(c, r) {
-  if (callCountForAddBomb < 1 && c != r && r > 0 && c > 0) {
+function initializeBricks() {
+  
+}
+
+/* function addPaddleModifier(c, r, powerUp) {
+  if (powerUpCallCounts.callCountForPaddleModifier < 1 && c != r && r > 0 && c > 0) {
     let randC = Math.round(Math.random() * c);
     const randR = Math.round(Math.random() * r);
     return c == randC && r == randR;
   }
-  return false 
-}
+  return false; 
+} */
 
-function drawLifeBall(mx, my) {
-  if (extraLife.visible) {
+function drawPowerUp(powerUp, color) {
+  if (powerUp.visible) {
     ctx.beginPath();
-    ctx.arc(mx, my, 5, 0, Math.PI * 2);
-    ctx.fillStyle = "pink";
+    if (powerUp.name == "Extra Life"){
+      ctx.arc(powerUp.x, powerUp.y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+    } else if (powerUp.name == "Paddle Extender") {
+      ctx.arc(powerUp.x, powerUp.y, 7, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+    }  
     ctx.fill();
     ctx.closePath();
   }
 }
 
-function updateLifeBallPosition() {
-  if (extraLife.visible) {
-    extraLife.y += 0.5;
+function updatePowerUpPosition(powerUp) {
+  if (powerUp.visible) {
+    powerUp.name == "Extra Life"
+      ? (powerUp.y += 0.5)
+      : powerUp.name == "Paddle Extender"
+      ? (powerUp.y += 0.8)
+      : null;
+
   } 
 }
 
-function checkLifeBallAndPaddleCollision() {
+function checkPowerUpAndPaddleCollision(powerUp) {
   if (
-    extraLife.visible &&
-    extraLife.x >= paddleX - paddleHeight / 2 &&
-    extraLife.x <= paddleX + paddleWidth + paddleHeight / 2 &&
-    extraLife.y >= canvas.height - 5 - paddleHeight
+    powerUp.visible &&
+    powerUp.x >= paddleX - paddleHeight / 2 &&
+    powerUp.x <= paddleX + paddleWidth + paddleHeight / 2 &&
+    powerUp.y >= canvas.height - 5 - paddleHeight
   ) {
-    console.log("hello");
-    lives += changeLife();
-    extraLife.visible = false;
+    if (powerUp.name == "Extra Life") {
+      lives += changeLife();
+    } else if (powerUp.name == "Paddle Extender") {
+      paddleWidth += changeLife() * 10;
+    } 
+    powerUp.visible = false;
   }
 }
 
