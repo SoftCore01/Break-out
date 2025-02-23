@@ -4,6 +4,7 @@
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 const startButton = document.getElementById("runButton");
+const pauseButton = document.getElementById("pause");
 
 const ballRadius = 10;
 const paddleHeight = 10;
@@ -324,18 +325,24 @@ function checkAllStatus() {
 }
 
 function pausePlay() {
-  if (isPlay) {
+  if (isPlay && isStart) {
     ddx = dx;
     ddy = dy;
     dx = 0;
     dy = 0;
     isPlay = false;
     destroyPaddleControls();
-  } else {
+    pauseButton.style.backgroundColor = "blue";
+    pauseButton.style.border = "2px solid white";
+    pauseButton.style.color = "white";
+  } else if(!isPlay && isStart) {
     dx = ddx;
     dy = ddy;
     isPlay = true;
     createPaddleControls();
+    pauseButton.style.backgroundColor = "transparent";
+    pauseButton.style.border = "2px solid blue";
+    pauseButton.style.color = "black";
   }
 }
 
@@ -531,10 +538,11 @@ document.getElementById("runButton").addEventListener("click", function () {
     startButton.style.border = "2px solid white";
     startButton.style.color = "white";
     isStart = true;
+    isPlay = true
   }
   
 });
-document.getElementById("pause").addEventListener("click", pausePlay);
+pauseButton.addEventListener("click", pausePlay);
 document.addEventListener("keydown", (e) => {
   e.code == "Escape" ? pausePlay() : null;
 });

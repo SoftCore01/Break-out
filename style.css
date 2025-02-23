@@ -27,9 +27,12 @@ canvas {
 
 button {
   display: block;
-  width: 100px;
+  width: 120px;
   height: 35px;
   border-radius: 15px;
+  background-color: transparent;
+  font-size: bold;
+  font-size: 1rem;
 }
 
 #runButton {
