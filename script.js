@@ -441,20 +441,20 @@ function drawPowerUp(powerUp) {
     if (powerUp.name == "Extra Life") {
       const img = new Image();
       extraLife.polarity > 0
-        ? (img.src = "/imgs/heart-svgrepo-com.svg")
-        : (img.src = "/imgs/heart-remove-svgrepo-com.svg");
+        ? (img.src = "./imgs/heart-svgrepo-com.svg")
+        : (img.src = "./imgs/heart-remove-svgrepo-com.svg");
       ctx.drawImage(img, powerUp.x, powerUp.y, powerUp.size, powerUp.size);
     } else if (powerUp.name == "Paddle Extender") {
       const img = new Image();
-      img.src = "/imgs/plus-minus-svgrepo-com.svg";
+      img.src = "./imgs/plus-minus-svgrepo-com.svg";
       ctx.drawImage(img, powerUp.x, powerUp.y, powerUp.size, powerUp.size);
     } else if (powerUp.name == "Ice") {
       const img = new Image();
-      img.src = "/imgs/ice-svgrepo-com.svg";
+      img.src = "./imgs/ice-svgrepo-com.svg";
       ctx.drawImage(img, powerUp.x, powerUp.y, powerUp.size, powerUp.size);
     } else if (powerUp.name == "Bomb") {
       const img = new Image();
-      img.src = "/imgs/bomb-svgrepo-com.svg";
+      img.src = "./imgs/bomb-svgrepo-com.svg";
       ctx.drawImage(img, powerUp.x, powerUp.y, powerUp.size, brickHeight);
     }
     ctx.closePath();
