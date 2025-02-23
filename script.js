@@ -59,6 +59,7 @@ for (let c = 0; c < brickColumnCount; c++) {
     if (addPowerUpToBrick(c, r, extraLife)) {
       bricks[c][r].life = true;
       extraLife.isCalled = true;
+      extraLife.visible = true;
       extraLife.polarity = changeLife();
     }
     if (addPowerUpToBrick(c, r, bomb)) {
@@ -70,10 +71,12 @@ for (let c = 0; c < brickColumnCount; c++) {
     if (addPowerUpToBrick(c, r, paddleModifier)) {
       bricks[c][r].paddleMod = true;
       paddleModifier.isCalled = true;
+      paddleModifier.visible = true
     }
     if (addPowerUpToBrick(c, r, ice)) {
       bricks[c][r].ice = true;
       ice.isCalled = true;
+      ice.visible = true
     }
   }
 }
@@ -174,10 +177,22 @@ function drawBricks() {
           : r == 2
           ? (ctx.fillStyle = "#0095DD")
           : (ctx.fillStyle = "yellow");
-        bricks[c][r].bomb ? (ctx.fillStyle = "purple") : null;
+        /* bricks[c][r].bomb ? (ctx.fillStyle = "purple") : null; */
         if (bricks[c][r].bomb) {
-          bomb.x = bricks[c][r].x + brickWidth / 2;
+          bomb.x = bricks[c][r].x + brickWidth / 2 - bomb.size / 2;
           bomb.y = bricks[c][r].y;
+        }
+        if (bricks[c][r].life) {
+          extraLife.x = bricks[c][r].x + brickWidth / 2 - extraLife.size / 2;
+          extraLife.y = bricks[c][r].y;
+        }
+        if (bricks[c][r].paddleMod) {
+          paddleModifier.x = bricks[c][r].x + brickWidth / 2 - paddleModifier.size / 2;
+          paddleModifier.y = bricks[c][r].y;
+        }
+        if (bricks[c][r].ice) {
+          ice.x = bricks[c][r].x + brickWidth / 2 - ice.size / 2;
+          ice.y = bricks[c][r].y;
         }
         ctx.fill();
         ctx.closePath();
@@ -228,13 +243,13 @@ function collisionDetection() {
 
 function drawScore() {
   ctx.font = "16px Arial";
-  ctx.fillStyle = "#0095DD";
+  ctx.fillStyle = "black";
   ctx.fillText(`Score: ${score}`, 8, 20);
 }
 
 function drawLive() {
   ctx.font = "16px Arial";
-  ctx.fillStyle = "#0095DD";
+  ctx.fillStyle = "black";
   ctx.fillText(`Lives: ${lives-1}`, canvas.width - 65, 20);
 }
 
@@ -263,7 +278,6 @@ function mouseMoveHandler(e) {
 
 function touchMoveHandler(e) {
   const relativeX = e.touches[0].clientX - canvas.offsetLeft;
-  console.log(relativeX)
   if (relativeX > 0 &&  relativeX < canvas.width - paddleWidth) {
     paddleX = relativeX;
   }
@@ -361,7 +375,7 @@ function destroyPaddleControls() {
   document.removeEventListener("keydown", keyDownHandler);
   document.removeEventListener("keyup", keyUpHandler);
   document.removeEventListener("mousemove", mouseMoveHandler);
-  document.addEventListener("touchmove", touchMoveHandler, false);
+  document.removeEventListener("touchmove", touchMoveHandler, false);
 }
 
 function ballWallCollision() {
@@ -448,16 +462,16 @@ function drawPowerUp(powerUp) {
       const img = new Image();
       extraLife.polarity > 0
         ? (img.src = "./imgs/heart-svgrepo-com.svg")
-        : (img.src = "./imgs/heart-remove-svgrepo-com.svg");
-      ctx.drawImage(img, powerUp.x, powerUp.y, powerUp.size, powerUp.size);
+        : (img.src = "./imgs/heart-tick-svgrepo-com.svg");
+      ctx.drawImage(img, powerUp.x, powerUp.y, powerUp.size, brickHeight);
     } else if (powerUp.name == "Paddle Extender") {
       const img = new Image();
       img.src = "./imgs/plus-minus-svgrepo-com.svg";
-      ctx.drawImage(img, powerUp.x, powerUp.y, powerUp.size, powerUp.size);
+      ctx.drawImage(img, powerUp.x, powerUp.y, powerUp.size, brickHeight);
     } else if (powerUp.name == "Ice") {
       const img = new Image();
       img.src = "./imgs/ice-svgrepo-com.svg";
-      ctx.drawImage(img, powerUp.x, powerUp.y, powerUp.size, powerUp.size);
+      ctx.drawImage(img, powerUp.x, powerUp.y, powerUp.size, brickHeight);
     } else if (powerUp.name == "Bomb") {
       const img = new Image();
       img.src = "./imgs/bomb-svgrepo-com.svg";
@@ -555,5 +569,3 @@ document.addEventListener("keydown", (e) => {
 document.addEventListener("keydown", (e) => {
   e.code == "Space" ? rounds.visible = true : null;
 })
-/* 
-document.addEventListener("touchmove", (e) => console.log(e.touches[0].clientX)) */
