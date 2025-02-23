@@ -72,7 +72,6 @@ for (let c = 0; c < brickColumnCount; c++) {
       paddleModifier.isCalled = true;
     }
     if (addPowerUpToBrick(c, r, ice)) {
-      console.log(c, r, ice);
       bricks[c][r].ice = true;
       ice.isCalled = true;
     }
@@ -214,7 +213,6 @@ function collisionDetection() {
             b.paddleMod = false;
           }
           if (b.ice) {
-            console.log("hellooo")
             ice.visible = true;
             ice.x = b.x;
             ice.y = b.y;
@@ -259,6 +257,14 @@ function keyUpHandler(e) {
 function mouseMoveHandler(e) {
   const relativeX = e.clientX - canvas.offsetLeft;
   if (relativeX > 0 && relativeX < canvas.width - paddleWidth) {
+    paddleX = relativeX;
+  }
+}
+
+function touchMoveHandler(e) {
+  const relativeX = e.touches[0].clientX - canvas.offsetLeft;
+  console.log(relativeX)
+  if (relativeX > 0 &&  relativeX < canvas.width - paddleWidth) {
     paddleX = relativeX;
   }
 }
@@ -348,12 +354,14 @@ function createPaddleControls() {
   document.addEventListener("keydown", keyDownHandler, false);
   document.addEventListener("keyup", keyUpHandler, false);
   document.addEventListener("mousemove", mouseMoveHandler, false);
+  document.addEventListener("touchmove", touchMoveHandler, false);
 }
 
 function destroyPaddleControls() {
   document.removeEventListener("keydown", keyDownHandler);
   document.removeEventListener("keyup", keyUpHandler);
   document.removeEventListener("mousemove", mouseMoveHandler);
+  document.addEventListener("touchmove", touchMoveHandler, false);
 }
 
 function ballWallCollision() {
@@ -547,3 +555,5 @@ document.addEventListener("keydown", (e) => {
 document.addEventListener("keydown", (e) => {
   e.code == "Space" ? rounds.visible = true : null;
 })
+/* 
+document.addEventListener("touchmove", (e) => console.log(e.touches[0].clientX)) */
