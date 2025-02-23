@@ -3,6 +3,7 @@
 
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
+const startButton = document.getElementById("runButton");
 
 const ballRadius = 10;
 const paddleHeight = 10;
@@ -94,6 +95,7 @@ let paddleSpeed = 7;
 /* let callCountForAddExtraLives = 0; */
 
 let isPlay = false;
+let isStart = false;
 let ddx, ddy;
 
 
@@ -276,6 +278,7 @@ function startGame() {
 function restartGame() {
   paddleSpeed = 7;
   isRestart = true;
+  isStart = false;
   extraLife.isCalled = false;
   bomb.isCalled = false;
   paddleModifier.isCalled = false;
@@ -522,8 +525,14 @@ function changeLife() {
 }
 
 document.getElementById("runButton").addEventListener("click", function () {
-  startGame();
-  this.disable = true;
+  if (!isStart) {
+    startGame();
+    startButton.style.backgroundColor = "red";
+    startButton.style.border = "2px solid white";
+    startButton.style.color = "white";
+    isStart = true;
+  }
+  
 });
 document.getElementById("pause").addEventListener("click", pausePlay);
 document.addEventListener("keydown", (e) => {
