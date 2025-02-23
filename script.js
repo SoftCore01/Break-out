@@ -57,19 +57,17 @@ for (let c = 0; c < brickColumnCount; c++) {
       ice: false
     };
     if (addPowerUpToBrick(c, r, extraLife)) {
-      console.log(c, r, extraLife);
       bricks[c][r].life = true;
       extraLife.isCalled = true;
       extraLife.polarity = changeLife();
     }
     if (addPowerUpToBrick(c, r, bomb)) {
-      console.log(c, r, bomb);
+
       bricks[c][r].bomb = true;
       bomb.isCalled = true;
       bomb.visible = true;
     }
     if (addPowerUpToBrick(c, r, paddleModifier)) {
-      console.log(c, r, paddleModifier);
       bricks[c][r].paddleMod = true;
       paddleModifier.isCalled = true;
     }
