@@ -350,15 +350,15 @@ function pausePlay() {
     dx = 0;
     dy = 0;
     isPlay = false;
-    destroyPaddleControls();
+    clearInterval(interval);
     pauseButton.style.backgroundColor = "blue";
     pauseButton.style.border = "2px solid white";
     pauseButton.style.color = "white";
   } else if(!isPlay && isStart) {
+    interval = setInterval(draw, 10);
     dx = ddx;
     dy = ddy;
     isPlay = true;
-    createPaddleControls();
     pauseButton.style.backgroundColor = "transparent";
     pauseButton.style.border = "2px solid blue";
     pauseButton.style.color = "black";
@@ -372,12 +372,6 @@ function createPaddleControls() {
   document.addEventListener("touchmove", touchMoveHandler, false);
 }
 
-function destroyPaddleControls() {
-  document.removeEventListener("keydown", keyDownHandler);
-  document.removeEventListener("keyup", keyUpHandler);
-  document.removeEventListener("mousemove", mouseMoveHandler);
-  document.removeEventListener("touchmove", touchMoveHandler, false);
-}
 
 function ballWallCollision() {
   if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
@@ -454,7 +448,6 @@ function addPowerUpToBrick(c, r, powerUp) {
   return false;
 }
 
-function initializeBricks() {}
 
 function drawPowerUp(powerUp) {
   if (powerUp.visible) {
@@ -462,8 +455,8 @@ function drawPowerUp(powerUp) {
     if (powerUp.name == "Extra Life") {
       const img = new Image();
       extraLife.polarity > 0
-        ? (img.src = "./imgs/heart-svgrepo-com.svg")
-        : (img.src = "./imgs/heart-tick-svgrepo-com.svg");
+        ? (img.src = "./imgs/heart-tick-svgrepo-com.svg")
+        : (img.src = "./imgs/heart-remove-svgrepo-com.svg");
       ctx.drawImage(img, powerUp.x, powerUp.y, powerUp.size, brickHeight);
     } else if (powerUp.name == "Paddle Extender") {
       const img = new Image();
@@ -568,6 +561,3 @@ pauseButton.addEventListener("click", pausePlay);
 document.addEventListener("keydown", (e) => {
   e.code == "Escape" ? pausePlay() : null;
 });
-document.addEventListener("keydown", (e) => {
-  e.code == "Space" ? rounds.visible = true : null;
-})
