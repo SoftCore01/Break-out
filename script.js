@@ -63,7 +63,6 @@ for (let c = 0; c < brickColumnCount; c++) {
       extraLife.polarity = changeLife();
     }
     if (addPowerUpToBrick(c, r, bomb)) {
-
       bricks[c][r].bomb = true;
       bomb.isCalled = true;
       bomb.visible = true;
@@ -297,7 +296,6 @@ function startGame() {
 function restartGame() {
   paddleSpeed = 7;
   isRestart = true;
-  isStart = false;
   extraLife.isCalled = false;
   bomb.isCalled = false;
   paddleModifier.isCalled = false;
@@ -315,6 +313,7 @@ function restartGame() {
         bricks[c][r].life = true;
         extraLife.isCalled = true;
         extraLife.polarity = changeLife();
+        extraLife.visible = true;
       }
       if (addPowerUpToBrick(c, r, bomb)) {
         bricks[c][r].bomb = true;
@@ -324,10 +323,12 @@ function restartGame() {
       if (addPowerUpToBrick(c, r, paddleModifier)) {
         bricks[c][r].paddleMod = true;
         paddleModifier.isCalled = true;
+        paddleModifier.visible = true;
       }
       if (addPowerUpToBrick(c,r, ice)) {
         bricks[c][r].ice = true;
         ice.isCalled = true;
+        ice.visible = true;
       }
     }
   }
@@ -509,6 +510,7 @@ function checkPowerUpAndPaddleCollision(powerUp) {
     } else if (powerUp.name == "Ice") {
       paddleSpeed = 0;
       document.removeEventListener("mousemove", mouseMoveHandler);
+      document.removeEventListener("touchmove", touchMoveHandler);
     }
     powerUp.visible = false;
   }
