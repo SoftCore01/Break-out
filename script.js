@@ -410,8 +410,8 @@ function paddleMovementByKeydown() {
 
 function paddleBallCollision() {
   return (
-    x > paddleX - paddleHeight / 2 &&
-    x < paddleX + paddleWidth + paddleHeight / 2
+    x > paddleX - ballRadius / 2 &&
+    x < paddleX + paddleWidth + ballRadius / 2
   );
 }
 
@@ -422,6 +422,7 @@ function repositionBallAndPaddle() {
   dy = 1;
   paddleX = (canvas.width - paddleWidth) / 2;
   document.addEventListener("mousemove", mouseMoveHandler, false);
+  document.addEventListener("touchmove", touchMoveHandler, false)
   paddleSpeed = 7;
 }
 
