@@ -6,13 +6,13 @@ const ctx = canvas.getContext("2d");
 const startButton = document.getElementById("runButton");
 const pauseButton = document.getElementById("pause");
 
-const ballRadius = 10;
-const paddleHeight = 10;
+const ballRadius = 5;
+const paddleHeight = 7;
 let paddleWidth = 75;
-const brickRowCount = 4;
-const brickColumnCount = 5;
-const brickWidth = 75;
-const brickHeight = 20;
+const brickRowCount = 5;
+const brickColumnCount = 7;
+const brickWidth = 50;
+const brickHeight = 15;
 const brickPadding = 10;
 const brickOffsetTop = 30;
 const brickOffsetLeft = 30;
@@ -175,7 +175,9 @@ function drawBricks() {
           ? (ctx.fillStyle = "green")
           : r == 2
           ? (ctx.fillStyle = "#0095DD")
-          : (ctx.fillStyle = "yellow");
+          : r == 3
+          ? (ctx.fillStyle = "yellow")
+          : (ctx.fillStyle = "purple");
         /* bricks[c][r].bomb ? (ctx.fillStyle = "purple") : null; */
         if (bricks[c][r].bomb) {
           bomb.x = bricks[c][r].x + brickWidth / 2 - bomb.size / 2;
@@ -288,6 +290,7 @@ function gameOver() {
 }
 
 function startGame() {
+  console.log(window.screen.width, window.screen.width / 5)
   interval = setInterval(draw, 10);
   createPaddleControls();
   isPlay = true;
