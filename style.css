@@ -12,6 +12,7 @@ html, body {
 canvas {
   display: block;
   margin: 10px auto;
+  border: 1px dashed black;
   width: 100%;
   max-width: 480px;
   height: 70%;

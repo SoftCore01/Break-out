@@ -272,15 +272,15 @@ function keyUpHandler(e) {
 
 function mouseMoveHandler(e) {
   const relativeX = e.clientX - canvas.offsetLeft;
-  if (relativeX > 0 && relativeX < canvas.width - paddleWidth) {
-    paddleX = relativeX;
+  if (relativeX > 0 && relativeX < canvas.width - paddleWidth / 2) {
+    paddleX = Math.max(0,relativeX - paddleWidth / 2);
   }
 }
 
 function touchMoveHandler(e) {
   const relativeX = e.touches[0].clientX - canvas.offsetLeft;
-  if (relativeX > 0 &&  relativeX < canvas.width - paddleWidth) {
-    paddleX = relativeX;
+  if (relativeX > 0 &&  relativeX < canvas.width - paddleWidth / 2) {
+    paddleX = Math.max(0, relativeX - paddleWidth / 2);
   }
 }
 
@@ -290,7 +290,6 @@ function gameOver() {
 }
 
 function startGame() {
-  console.log(window.screen.width, window.screen.width / 5)
   interval = setInterval(draw, 10);
   createPaddleControls();
   isPlay = true;
