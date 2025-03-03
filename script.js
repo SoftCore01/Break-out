@@ -1,4 +1,4 @@
-/* import { createPaddleControls, destroyPaddleControls } from "./modules/functions.js"; */
+import { createBricks, drawBricks } from "./modules/functions.js";
 //To use import statements like above add type="module" to the script element of your index.html file.
 
 const canvas = document.getElementById("myCanvas");
@@ -6,6 +6,11 @@ const ctx = canvas.getContext("2d");
 const startButton = document.getElementById("runButton");
 const pauseButton = document.getElementById("pause");
 
+const colors = {
+  red: ["#620000", "#930000", "#c40000", "#f50000", "#ff2727", "#ff5858", "#ff8989"],
+  blue: ["#000062", "#000093", "#0000c4", "#0000f5", "#2727ff", "#5858ff", "#8989ff"],
+  
+};
 const ballRadius = 5;
 const paddleHeight = 7;
 let paddleWidth = 80;
@@ -43,42 +48,11 @@ const ice = {
 };
 const bomb = { name: "Bomb", x: 0, y: 0, size: 25, visible: false, isCalled: false };
 
-const bricks = [];
-for (let c = 0; c < brickColumnCount; c++) {
-  bricks[c] = [];
-  for (let r = 0; r < brickRowCount; r++) {
-    bricks[c][r] = {
-      x: 0,
-      y: 0,
-      status: 1,
-      life: false,
-      bomb: false,
-      paddleMode: false,
-      ice: false
-    };
-    if (addPowerUpToBrick(c, r, extraLife)) {
-      bricks[c][r].life = true;
-      extraLife.isCalled = true;
-      extraLife.visible = true;
-      extraLife.polarity = changeLife();
-    }
-    if (addPowerUpToBrick(c, r, bomb)) {
-      bricks[c][r].bomb = true;
-      bomb.isCalled = true;
-      bomb.visible = true;
-    }
-    if (addPowerUpToBrick(c, r, paddleModifier)) {
-      bricks[c][r].paddleMod = true;
-      paddleModifier.isCalled = true;
-      paddleModifier.visible = true
-    }
-    if (addPowerUpToBrick(c, r, ice)) {
-      bricks[c][r].ice = true;
-      ice.isCalled = true;
-      ice.visible = true
-    }
-  }
-}
+const bricks = createBricks(
+  brickColumnCount, brickRowCount, extraLife, 
+  bomb, paddleModifier,ice, addPowerUpToBrick, changeLife
+);
+
 
 let paddleX = (canvas.width - paddleWidth) / 2;
 let x = randomRange(50, canvas.width - 50);
@@ -101,10 +75,24 @@ let ddx, ddy;
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  console.log(dx)
   drawBall();
   drawPaddle();
-  drawBricks();
+  drawBricks(
+    brickColumnCount,
+    brickRowCount,
+    brickHeight,
+    brickWidth,
+    brickPadding,
+    brickOffsetLeft,
+    brickOffsetTop,
+    isRestart,
+    bomb,
+    extraLife,
+    ice,
+    paddleModifier,
+    bricks,
+    ctx
+  );
   collisionDetection();
   drawScore();
   drawLive();
@@ -146,62 +134,7 @@ function drawPaddle() {
   ctx.closePath();
 }
 
-function drawBricks() {
-  for (let c = 0; c < brickColumnCount; c++) {
-    for (let r = 0; r < brickRowCount; r++) {
-      if (bricks[c][r].status === 1) {
-        if (
-          isRestart &&
-          bricks[c][r].y < r * (brickHeight + brickPadding) + brickOffsetTop
-        ) {
-          bricks[c][r].y += 0.5;
-        } else {
-          isRestart = false;
-          const brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
-          bricks[c][r].y = brickY;
-        }
-        const brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
-        bricks[c][r].x = brickX;
-        ctx.beginPath();
-        ctx.roundRect(
-          brickX,
-          bricks[c][r].y,
-          brickWidth,
-          brickHeight,
-          brickHeight / 2
-        );
-        r == 0
-          ? (ctx.fillStyle = "red")
-          : r == 1
-          ? (ctx.fillStyle = "green")
-          : r == 2
-          ? (ctx.fillStyle = "#0095DD")
-          : r == 3
-          ? (ctx.fillStyle = "yellow")
-          : (ctx.fillStyle = "purple");
-        /* bricks[c][r].bomb ? (ctx.fillStyle = "purple") : null; */
-        if (bricks[c][r].bomb) {
-          bomb.x = bricks[c][r].x + brickWidth / 2 - bomb.size / 2;
-          bomb.y = bricks[c][r].y;
-        }
-        if (bricks[c][r].life) {
-          extraLife.x = bricks[c][r].x + brickWidth / 2 - extraLife.size / 2;
-          extraLife.y = bricks[c][r].y;
-        }
-        if (bricks[c][r].paddleMod) {
-          paddleModifier.x = bricks[c][r].x + brickWidth / 2 - paddleModifier.size / 2;
-          paddleModifier.y = bricks[c][r].y;
-        }
-        if (bricks[c][r].ice) {
-          ice.x = bricks[c][r].x + brickWidth / 2 - ice.size / 2;
-          ice.y = bricks[c][r].y;
-        }
-        ctx.fill();
-        ctx.closePath();
-      }
-    }
-  }
-}
+
 
 function collisionDetection() {
   for (let c = 0; c < brickColumnCount; c++) {
@@ -388,7 +321,6 @@ function ballWallCollision() {
     if (paddleBallCollision()) {
       dy = -dy;
       if (x + dx < paddleX + 30  && dx > 0) {
-        console.log(x)
         dx = -1
       } else if (x + dx > paddleX + 60 && dx < 0) {
         dx = 1;
