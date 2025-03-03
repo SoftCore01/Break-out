@@ -9,7 +9,7 @@ const pauseButton = document.getElementById("pause");
 const colors = {
   red: ["#620000", "#930000", "#c40000", "#f50000", "#ff2727", "#ff5858", "#ff8989"],
   blue: ["#000062", "#000093", "#0000c4", "#0000f5", "#2727ff", "#5858ff", "#8989ff"],
-  
+
 };
 const ballRadius = 5;
 const paddleHeight = 7;
@@ -75,6 +75,7 @@ let ddx, ddy;
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  console.log(bomb.visible)
   drawBall();
   drawPaddle();
   drawBricks(
@@ -142,6 +143,7 @@ function collisionDetection() {
       const b = bricks[c][r];
       if (b.status === 1) {
         if (hasBallAndBrickCollided(b)) {
+          dy == -1.4 ? dy = 1 : null
           dy = -dy;
           b.status = 0;
           /* b.life ? lives ++ : null; */
@@ -326,6 +328,7 @@ function ballWallCollision() {
         dx = 1;
       } else {
         dx > 0 ? dx = 0.5 : dx = -0.5;
+        dy == -1 ? dy = -1.5: null;
       }
     } else {
       lives--;
