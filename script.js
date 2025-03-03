@@ -8,7 +8,7 @@ const pauseButton = document.getElementById("pause");
 
 const ballRadius = 5;
 const paddleHeight = 7;
-let paddleWidth = 75;
+let paddleWidth = 80;
 const brickRowCount = 5;
 const brickColumnCount = 7;
 const brickWidth = 50;
@@ -101,6 +101,7 @@ let ddx, ddy;
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  console.log(dx)
   drawBall();
   drawPaddle();
   drawBricks();
@@ -377,13 +378,23 @@ function createPaddleControls() {
 
 function ballWallCollision() {
   if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
+    dx == 0.5 ? dx = 1 : dx == -0.5 ? dx = -1 : null;
     dx = -dx;
   }
   if (y + dy < ballRadius) {
+    dx == 0.5 ? (dx = 1) : dx == -0.5 ? (dx = -1) : null;
     dy = -dy;
   } else if (y + dy > canvas.height - ballRadius - paddleHeight) {
     if (paddleBallCollision()) {
       dy = -dy;
+      if (x + dx < paddleX + 30  && dx > 0) {
+        console.log(x)
+        dx = -1
+      } else if (x + dx > paddleX + 60 && dx < 0) {
+        dx = 1;
+      } else {
+        dx > 0 ? dx = 0.5 : dx = -0.5;
+      }
     } else {
       lives--;
       repositionBallAndPaddle();
@@ -412,8 +423,8 @@ function paddleMovementByKeydown() {
 
 function paddleBallCollision() {
   return (
-    x > paddleX - ballRadius / 2 &&
-    x < paddleX + paddleWidth + ballRadius / 2
+    x > paddleX - ballRadius &&
+    x < paddleX + paddleWidth + ballRadius
   );
 }
 
